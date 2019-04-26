@@ -1,0 +1,14 @@
+{
+  "name": "vvocommandline",
+  "version": "1.0.0",
+  "preferGlobal": true,
+  "author": "Adwirawien",
+  "bin": {
+    "vvo": "./index.js"
+  },
+  "dependencies": {
+    "colors": "^1.3.3",
+    "commander": "^2.20.0",
+    "inquirer": "^6.3.1"
+  }
+}
