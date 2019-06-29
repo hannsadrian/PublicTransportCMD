@@ -2,7 +2,7 @@
 
 const inquirer = require("inquirer");
 const colors = require("colors");
-const fetch = require("node-fetch");
+const dvb = require("dvbjs");
 
 async function getStopFromUser() {
   return new Promise((resolve, reject) => {
@@ -14,57 +14,67 @@ async function getStopFromUser() {
       }
     ];
 
-    inquirer.prompt(questions).then(answers => {
+    inquirer.prompt(questions).then((answers) => {
       resolve(answers.stopName);
     });
   });
 }
 
-async function getStop(hst) {
-  return new Promise((resolve, reject) => {
-    fetch(
-      "http://widgets.vvo-online.de/abfahrtsmonitor/Haltestelle.do?hst=" + hst
-    ).then(res => resolve(res.json()));
-  });
-}
-
-async function getDepartures(hst) {
-  return new Promise((resolve, reject) => {
-    fetch(
-      "http://widgets.vvo-online.de/abfahrtsmonitor/Abfahrten.do?hst=" + hst
-    ).then(res => resolve(res.json()));
-  });
+function getWhiteSpaces(amount) {
+  offset = 1;
+  amount += offset;
+  var output = "";
+  for (i = 0; i < amount; i++) {
+    output += " ";
+  }
+  return output;
 }
 
 async function executeCMD() {
   console.log("");
   console.log(colors.bold(colors.america("-------------------------")));
   console.log("");
+
   var stop = await getStopFromUser();
+
   console.log("");
-  console.log(
-    colors.italic(colors.yellow("-") + " Fetching Departures for ") +
-      colors.italic(colors.cyan(stop))
-  );
-  var departures = await getDepartures(stop);
-  var stopFound = await getStop(stop);
-  console.log(
-    colors.italic(colors.yellow("-") + " Found departures for ") +
-      colors.italic(
-        colors.cyan(JSON.stringify(stopFound[1][0][0]).replace(/"/g, ""))
-      )
-  );
-  console.log("");
-  var max = [0, 0, 3];
-  departures.forEach(departure => {
-    if (departure[0].length > max[0]) max[0] = departure[0].length;
-    if (departure[1].length > max[1]) max[1] = departure[1].length;
-    if (departure[2].length > max[2]) max[2] = departure[2].length;
+
+  // Find stop and monitor it
+
+  var stopID = "";
+  var stopFound = await dvb.findStop(stop).then((data) => {
+    stopID = data[0].id;
+    return data[0].name + ", " + data[0].city;
   });
-  var header = ["Linie", "Min"];
-  for (i = 0; i < max[0] + max[1] + 1; i++) {
-    if (header[0].length < max[0] + max[1] + 1) header[0] += " ";
+
+  var departures = await dvb.monitor(stopID, 0, 10).then((data) => {
+    return data;
+  });
+
+  console.log(
+    colors.italic(colors.yellow("-") + " Found stop ") +
+      colors.italic(colors.cyan(stopFound))
+  );
+  console.log("");
+
+  // Figure out max width for table entry
+
+  var maxWidths = [0, 0, 3];
+  departures.forEach((departure) => {
+    if (departure.line.length > maxWidths[0])
+      maxWidths[0] = departure.line.length;
+    if (departure.direction.length > maxWidths[1])
+      maxWidths[1] = departure.direction.length;
+    if (departure.arrivalTimeRelative.length > maxWidths[2])
+      maxWidths[2] = departure.arrivalTimeRelative.length;
+  });
+  var header = ["Line", "Min"];
+  for (i = 0; i < maxWidths[0] + maxWidths[1] + 1; i++) {
+    if (header[0].length < maxWidths[0] + maxWidths[1] + 1) header[0] += " ";
   }
+
+  // Printing stuff to console
+
   console.log(
     colors.gray("  | ") +
       colors.white(header[0]) +
@@ -72,27 +82,28 @@ async function executeCMD() {
       colors.white(header[1]) +
       colors.gray(" |")
   );
-  departures.forEach(departure => {
-    for (i = 0; i < departure.length; i++) {
-      for (y = 0; y < max[i]; y++) {
-        if (departure[i].length < max[i]) {
-          departure[i] += " ";
-        }
-      }
-    }
 
-    if (departure[2] === "   ") departure[2] = "0  ";
-
+  departures.forEach((departure) => {
     console.log(
       colors.gray("  | ") +
-        colors.yellow(departure[0]) +
-        colors.gray(" ") +
-        colors.white(departure[1]) +
-        colors.gray(" | ") +
-        colors.white(departure[2]) +
-        colors.gray(" |")
+        colors.yellow(
+          departure.line + getWhiteSpaces(maxWidths[0] - departure.line.length)
+        ) +
+        colors.white(
+          departure.direction +
+            getWhiteSpaces(maxWidths[1] - departure.direction.length)
+        ) +
+        colors.gray("| ") +
+        colors.white(
+          departure.arrivalTimeRelative +
+            getWhiteSpaces(
+              maxWidths[2] - departure.arrivalTimeRelative.toString().length
+            )
+        ) +
+        colors.gray("|")
     );
   });
+
   console.log("");
   console.log(colors.bold(colors.america("-------------------------")));
 }
