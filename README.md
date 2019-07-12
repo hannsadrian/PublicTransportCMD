@@ -1,6 +1,6 @@
 # 🚍 VVO Commandline tools
 
-This is a very simple implementation of [dvbjs](https://github.com/kiliankoe/dvbjs) made by [kiliankoe](https://github.com/kiliankoe) for the commandline
+This is a very simple implementation of [dvbjs](https://github.com/kiliankoe/dvbjs) for the commandline
 
 ## Installation
 
