@@ -3,6 +3,8 @@
 const inquirer = require("inquirer");
 const colors = require("colors");
 const dvb = require("dvbjs");
+const moment = require("moment");
+require("moment-duration-format");
 
 async function getStopFromUser() {
   return new Promise((resolve, reject) => {
@@ -40,7 +42,6 @@ async function executeCMD() {
   console.log("");
 
   // Find stop and monitor it
-
   var stopID = "";
   var stopFound = await dvb.findStop(stop).then((data) => {
     stopID = data[0].id;
@@ -52,29 +53,32 @@ async function executeCMD() {
   });
 
   console.log(
-    colors.italic(colors.yellow("-") + " Found stop ") +
-      colors.italic(colors.cyan(stopFound))
+    colors.italic("  Departures for ") + colors.italic(colors.cyan(stopFound))
   );
   console.log("");
 
   // Figure out max width for table entry
-
   var maxWidths = [0, 0, 3];
   departures.forEach((departure) => {
     if (departure.line.length > maxWidths[0])
       maxWidths[0] = departure.line.length;
     if (departure.direction.length > maxWidths[1])
       maxWidths[1] = departure.direction.length;
-    if (departure.arrivalTimeRelative.length > maxWidths[2])
-      maxWidths[2] = departure.arrivalTimeRelative.length;
+    if (
+      moment
+        .duration(departure.arrivalTimeRelative, "minutes")
+        .format("d[d] h[h] m[m]").length > maxWidths[2]
+    )
+      maxWidths[2] = moment
+        .duration(departure.arrivalTimeRelative, "minutes")
+        .format("d[d] h[h] m[m]").length;
   });
   var header = ["Line", "Min"];
   for (i = 0; i < maxWidths[0] + maxWidths[1] + 1; i++) {
     if (header[0].length < maxWidths[0] + maxWidths[1] + 1) header[0] += " ";
   }
 
-  // Printing stuff to console
-
+  // Print stuff to console
   console.log(
     colors.gray("  | ") +
       colors.white(header[0]) +
@@ -84,6 +88,9 @@ async function executeCMD() {
   );
 
   departures.forEach((departure) => {
+    if (departure.arrivalTimeRelative < 0) {
+      return;
+    }
     console.log(
       colors.gray("  | ") +
         colors.yellow(
@@ -95,9 +102,14 @@ async function executeCMD() {
         ) +
         colors.gray("| ") +
         colors.white(
-          departure.arrivalTimeRelative +
+          moment
+            .duration(departure.arrivalTimeRelative, "minutes")
+            .format("d[d] h[h] m[m]") +
             getWhiteSpaces(
-              maxWidths[2] - departure.arrivalTimeRelative.toString().length
+              maxWidths[2] -
+                moment
+                  .duration(departure.arrivalTimeRelative, "minutes")
+                  .format("d[d] h[h] m[m]").length
             )
         ) +
         colors.gray("|")
