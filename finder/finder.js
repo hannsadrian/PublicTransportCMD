@@ -2,20 +2,32 @@ const inquirer = require("inquirer");
 const colors = require("colors");
 const dvb = require("dvbjs");
 
-async function run() {
-  await executeCMD()
+function run(address, singleStop) {
+  executeCMD(singleStop, address)
 }
 
-async function getStopFromUser() {
+async function getStopFromUser(address, singleStop) {
   return new Promise((resolve, reject) => {
-    var questions = [{
-      type: "input",
-      name: "stopName",
-      message: "Input the name of the stop you want to find"
-    }];
+    if (address) {
+      var questions = [{
+        type: "number",
+        name: "lng",
+        message: "Input the longitude of your address"
+      },
+    {type: "number",
+    name: "lat",
+    message: "Input the latitude of your address"}];
+    } else {
+      var questions = [{
+        type: "input",
+        name: "stopName",
+        message: singleStop ? "Input the name of the stop you want to find" : "Input the name of the point you want to find"
+      }];
+    }
+    
 
     inquirer.prompt(questions).then((answers) => {
-      resolve(answers.stopName);
+      resolve(answers);
     });
   });
 }
@@ -32,16 +44,24 @@ function getWhiteSpaces(amount) {
 
 
 
-async function executeCMD() {
+async function executeCMD(address, singleStop) {
   console.log("");
   console.log(colors.bold(colors.america("-------------------------")));
   console.log("");
 
-  var stop = await getStopFromUser();
+  var input = await getStopFromUser(address, singleStop);
 
   console.log("");
 
-  var stops = await dvb.findPOI(stop)
+  var stops;
+
+  if (singleStop) {
+    stops = await dvb.findStop(input.stopName)
+  } else if (address) {
+    stops = await dvb.findAddress(input.lng, input.lat)
+  } else {
+    stops = await dvb.findPOI(input.stopName)
+  }
 
   console.log(
     colors.italic("  Results for ") + colors.italic(colors.cyan(stops[0].name + ", " + stops[0].city))
