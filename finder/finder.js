@@ -2,16 +2,16 @@ const inquirer = require("inquirer");
 const colors = require("colors");
 const dvb = require("dvbjs");
 
-async function run() {
-  await executeCMD()
+function run(address, singleStop) {
+  executeCMD(singleStop, address)
 }
 
-async function getStopFromUser() {
+async function getStopFromUser(address, singleStop) {
   return new Promise((resolve, reject) => {
     var questions = [{
       type: "input",
       name: "stopName",
-      message: "Input the name of the stop you want to find"
+      message: address ? "Input the name of the address you want to find" : singleStop ? "Input the name of the stop you want to find" : "Input the name of the point you want to find"
     }];
 
     inquirer.prompt(questions).then((answers) => {
@@ -32,16 +32,26 @@ function getWhiteSpaces(amount) {
 
 
 
-async function executeCMD() {
+async function executeCMD(address, singleStop) {
+  console.log("adress", address)
+  console.log("stop", singleStop)
   console.log("");
   console.log(colors.bold(colors.america("-------------------------")));
   console.log("");
 
-  var stop = await getStopFromUser();
+  var stop = await getStopFromUser(address, singleStop);
 
   console.log("");
 
-  var stops = await dvb.findPOI(stop)
+  var stops;
+
+  if (singleStop) {
+    stops = await dvb.findStop(stop)
+  } else if (address) {
+    stops = await dvb.findAddress(stop)
+  } else {
+    stops = await dvb.findPOI(stop)
+  }
 
   console.log(
     colors.italic("  Results for ") + colors.italic(colors.cyan(stops[0].name + ", " + stops[0].city))
