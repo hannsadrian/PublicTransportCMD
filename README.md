@@ -1,4 +1,4 @@
-# 🚍 VVO Commandline tools
+# 🚍 Public Transport Commandline Tools
 
 Public Transport Monitoring (and in the future even Planning) from your command line
 
