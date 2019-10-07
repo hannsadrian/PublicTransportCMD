@@ -8,14 +8,26 @@ function run(address, singleStop) {
 
 async function getStopFromUser(address, singleStop) {
   return new Promise((resolve, reject) => {
-    var questions = [{
-      type: "input",
-      name: "stopName",
-      message: address ? "Input the name of the address you want to find" : singleStop ? "Input the name of the stop you want to find" : "Input the name of the point you want to find"
-    }];
+    if (address) {
+      var questions = [{
+        type: "number",
+        name: "lng",
+        message: "Input the longitude of your address"
+      },
+    {type: "number",
+    name: "lat",
+    message: "Input the latitude of your address"}];
+    } else {
+      var questions = [{
+        type: "input",
+        name: "stopName",
+        message: singleStop ? "Input the name of the stop you want to find" : "Input the name of the point you want to find"
+      }];
+    }
+    
 
     inquirer.prompt(questions).then((answers) => {
-      resolve(answers.stopName);
+      resolve(answers);
     });
   });
 }
@@ -33,24 +45,22 @@ function getWhiteSpaces(amount) {
 
 
 async function executeCMD(address, singleStop) {
-  console.log("adress", address)
-  console.log("stop", singleStop)
   console.log("");
   console.log(colors.bold(colors.america("-------------------------")));
   console.log("");
 
-  var stop = await getStopFromUser(address, singleStop);
+  var input = await getStopFromUser(address, singleStop);
 
   console.log("");
 
   var stops;
 
   if (singleStop) {
-    stops = await dvb.findStop(stop)
+    stops = await dvb.findStop(input.stopName)
   } else if (address) {
-    stops = await dvb.findAddress(stop)
+    stops = await dvb.findAddress(input.lng, input.lat)
   } else {
-    stops = await dvb.findPOI(stop)
+    stops = await dvb.findPOI(input.stopName)
   }
 
   console.log(

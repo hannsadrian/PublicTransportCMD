@@ -3,6 +3,10 @@
 const monitor = require("./monitor")
 const finder = require("./finder/finder")
 
+
+// ATTENTION: This is not the final version
+// Proper command handling will be implemented in the future
+
 var args = process.argv.slice(2);
 
 if (args.length === 1) {
@@ -17,10 +21,11 @@ if (args.length === 1) {
     }
   });
 } else if (args.length === 2 && args[0] === "find") {
-  if (args[1] === "stop") {
-    console.log("stop")
-    finder.call(true)
+  if (args[1].startsWith("st")) { // stop
+    finder.call(true, true, false)
+  } else if (args[1].startsWith("ad")) { // address
+    finder.call(true, false, true)
   } else {
-    finder.call(false)
+    finder.call()
   }
 }
