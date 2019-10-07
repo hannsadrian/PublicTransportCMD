@@ -1,6 +1,6 @@
 # 🚍 VVO Commandline tools
 
-This is a very simple implementation of [dvbjs](https://github.com/kiliankoe/dvbjs) for the commandline
+Public Transport Monitoring (and in the future even Planning) from your command line
 
 ## Installation
 
