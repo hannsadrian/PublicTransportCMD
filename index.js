@@ -2,6 +2,7 @@
 
 const monitor = require("./monitor")
 const finder = require("./finder/finder")
+const planer = require("./planer/planer");
 
 
 // ATTENTION: This is not the final version
@@ -18,6 +19,9 @@ if (args.length === 1) {
       case "find":
         finder.call();
         break;
+      case "planer":
+        planer.call();
+      break;
     }
   });
 } else if (args.length === 2 && args[0] === "find") {
