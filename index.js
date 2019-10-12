@@ -19,7 +19,7 @@ if (args.length === 1) {
       case "find":
         finder.call();
         break;
-      case "planer":
+      case "plan":
         planer.call();
       break;
     }
