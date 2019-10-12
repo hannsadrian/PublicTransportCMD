@@ -9,4 +9,4 @@ Public Transport Monitoring (and in the future even Planning) from your command 
 3. cd into it <br>
 4. execute `$ npm install` <br>
 5. and optionally to make it available globally execute `$ npm i -g .` <br>
-6. use it with `$ vvo <monitor|find> [poi|stop|address]` <br>
+6. use it with `$ vvo <monitor|find|plan> [poi|stop|address]` <br>
