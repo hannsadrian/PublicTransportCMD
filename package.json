@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "preferGlobal": true,
   "author": "Adwirawien",
+  "contributors": [
+    "Lukas Kohlmaier (https://github.com/luko0610)"
+  ],
   "bin": {
     "vvo": "./index.js"
   },
