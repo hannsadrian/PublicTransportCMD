@@ -54,29 +54,30 @@ async function executeCMD(fromStop, toStop) {
             console.log("");
 
             for (var j = 0; j < data["trips"][0]["nodes"].length; j++) {
-                var departureName = data["trips"][0]["nodes"][j]["departure"]["name"] + "/" + data["trips"][0]["nodes"][j]["departure"]["city"];
-                var departureTime = data["trips"][0]["nodes"][j]["departure"]["time"];
+				departure = data["trips"][0]["nodes"][j]["departure"];
+				arrival = data["trips"][0]["nodes"][j]["arrival"];
+				mode = data["trips"][0]["nodes"][j]["mode"];
+				line = data["trips"][0]["nodes"][j]["line"];
+				direction = data["trips"][0]["nodes"][j]["direction"];
+				
+				if(departure["name"] != null) {
+					var departureName = departure["name"] + "/" + departure["city"];
+				}
+				var departureTime = new Date(departure["time"]).toLocaleString();
+				
+				if(data["trips"][0]["nodes"][j]["arrival"]["name"] != null) {
+					var arrivalName = arrival["name"] + "/" + arrival["city"];
+				}
+				var arrivalTime = new Date(arrival["time"]).toLocaleString();
 
+				console.log(colors.red(starLine));
                 console.log("Departing from " + departureName + " on " + departureTime);
-                console.log(colors.red(starLine));
-
-                if (data["trips"][0]["nodes"][j]["stops"].length > 0) {
-                    for (var i = 0; i < data["trips"][0]["nodes"][j]["stops"].length; i++) {
-                        var currentStop = data["trips"][0]["nodes"][j]["stops"][i];
-                        console.log(colors.green("************************************** Stop no " + (i + 1) + " *****************************************"));
-                        console.log(currentStop["name"] + "/" + currentStop["city"]);
-                        console.log("on " + currentStop["platform"]["type"] + " " + currentStop["platform"]["name"]);
-                        console.log("arrival " + currentStop["arrival"]);
-                        console.log("departure " + currentStop["departure"]);
-                        console.log(colors.green(starLine));
-                    }
-                }
-                else {
-                    var currentStop = data["trips"][0]["nodes"][j];
-                    console.log(currentStop["mode"]["title"]);
-                    console.log("taking " + currentStop["duration"] + " minutes");
-                    console.log(colors.green(starLine));
-                }
+				console.log("on " + departure["platform"]["type"] + " " + departure["platform"]["name"]);
+				console.log("means of transport " + mode["title"] + " / " + mode["name"]);
+				console.log("line " + line);
+				console.log("direction " + direction);
+				console.log("Arriving at " + arrivalName + " on " + arrivalTime);
+				console.log("on " + arrival["platform"]["type"] + " " + arrival["platform"]["name"]);
                 console.log(colors.red(starLine));
             }
         }
